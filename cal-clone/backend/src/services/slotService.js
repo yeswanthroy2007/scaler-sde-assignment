@@ -42,6 +42,11 @@ exports.generateSlots = async (dateStr, eventType, userId) => {
     let current = new Date(startObj);
     const slotDuration = eventType.duration || 30;
 
+    const toLocalISO = (date) => {
+        const pad = (n) => n.toString().padStart(2, '0');
+        return `${date.getUTCFullYear()}-${pad(date.getUTCMonth() + 1)}-${pad(date.getUTCDate())}T${pad(date.getUTCHours())}:${pad(date.getUTCMinutes())}:${pad(date.getUTCSeconds())}`;
+    };
+
     while (isBefore(addMinutes(current, slotDuration), endObj) || current.getTime() + slotDuration * 60000 === endObj.getTime()) {
         const slotEnd = addMinutes(current, slotDuration);
 
@@ -49,10 +54,10 @@ exports.generateSlots = async (dateStr, eventType, userId) => {
         // to avoid "next day" slots showing up unexpectedly
         if (slotEnd.getUTCDate() === startObj.getUTCDate()) {
             slots.push({
-                start: current.toISOString(),
-                end: slotEnd.toISOString(),
-                bufferedStart: addMinutes(current, -(eventType.bufferBefore || 0)).toISOString(),
-                bufferedEnd: addMinutes(slotEnd, (eventType.bufferAfter || 0)).toISOString()
+                start: toLocalISO(current),
+                end: toLocalISO(slotEnd),
+                bufferedStart: toLocalISO(addMinutes(current, -(eventType.bufferBefore || 0))),
+                bufferedEnd: toLocalISO(addMinutes(slotEnd, (eventType.bufferAfter || 0)))
             });
         }
         current = addMinutes(current, 15);

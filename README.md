@@ -74,14 +74,13 @@ npm install
 npm run dev
 
 API Endpoints:
+```
 GET /api/events - Fetch all event types.
 GET /api/availability - Get weekly schedule.
 POST /api/date-overrides - Create/Update specific date exceptions.
 GET /api/bookings/slots?date={date}&eventTypeId={id} - Get available time slots for a specific day.
-🔗 Project Links:
-
+```
+Project Links:
 GitHub Link: https://github.com/yeswanthroy2007/scaler-sde-assignment
-
 Deployed Frontend: https://cal-clone-peach.vercel.app/
-
 Deployed Backend: https://cal-clone-backend.vercel.app/

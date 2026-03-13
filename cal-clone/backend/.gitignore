@@ -1,0 +1,6 @@
+node_modules
+.env
+.DS_Store
+*.log
+prisma/migrations/*.sql
+# Keep the schema but ignore local db setup

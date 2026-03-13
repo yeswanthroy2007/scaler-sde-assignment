@@ -1,0 +1,84 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id             Int            @id @default(autoincrement())
+  name           String
+  email          String         @unique
+  eventTypes     EventType[]
+  availability   Availability[]
+  dateOverrides  DateOverride[]
+}
+
+model EventType {
+  id           Int       @id @default(autoincrement())
+  title        String
+  description  String?
+  duration     Int       // in minutes
+  slug         String    @unique
+  userId       Int
+  user         User      @relation(fields: [userId], references: [id])
+  bookings     Booking[]
+  bufferBefore Int       @default(0) // in minutes
+  bufferAfter  Int       @default(0) // in minutes
+  questions    BookingQuestion[]
+}
+
+model Availability {
+  id          Int    @id @default(autoincrement())
+  dayOfWeek   Int    // 0 = Sunday, 1 = Monday, ..., 6 = Saturday
+  startTime   String // "HH:MM"
+  endTime     String // "HH:MM"
+  timezone    String
+  userId      Int
+  user        User   @relation(fields: [userId], references: [id])
+}
+
+model Booking {
+  id          Int       @id @default(autoincrement())
+  eventTypeId Int
+  eventType   EventType @relation(fields: [eventTypeId], references: [id], onDelete: Cascade)
+  name        String
+  email       String
+  startTime   DateTime
+  endTime     DateTime
+  status      String    @default("CONFIRMED") // CONFIRMED, CANCELLED
+  createdAt   DateTime  @default(now())
+  answers     BookingAnswer[]
+}
+
+model DateOverride {
+  id        Int      @id @default(autoincrement())
+  date      DateTime @db.Date
+  startTime String?
+  endTime   String?
+  isBlocked Boolean  @default(false)
+  userId    Int
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, date])
+}
+
+model BookingQuestion {
+  id          Int             @id @default(autoincrement())
+  eventTypeId Int
+  eventType   EventType       @relation(fields: [eventTypeId], references: [id], onDelete: Cascade)
+  question    String
+  required    Boolean         @default(false)
+  answers     BookingAnswer[]
+}
+
+model BookingAnswer {
+  id         Int             @id @default(autoincrement())
+  bookingId  Int
+  booking    Booking         @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+  questionId Int
+  question   BookingQuestion @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  answer     String
+}

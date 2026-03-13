@@ -29,22 +29,33 @@ exports.generateSlots = async (dateStr, eventType, userId) => {
         endTimeStr = availability.endTime;
     }
 
-    const slots = [];
-    const startObj = parse(startTimeStr, 'HH:mm', date);
-    const endObj = parse(endTimeStr, 'HH:mm', date);
+    const [startH, startM] = startTimeStr.split(':').map(Number);
+    const [endH, endM] = endTimeStr.split(':').map(Number);
 
-    let current = startObj;
+    const startObj = new Date(startOfDate);
+    startObj.setUTCHours(startH, startM, 0, 0);
+
+    const endObj = new Date(startOfDate);
+    endObj.setUTCHours(endH, endM, 0, 0);
+
+    const slots = [];
+    let current = new Date(startObj);
     const slotDuration = eventType.duration || 30;
 
     while (isBefore(addMinutes(current, slotDuration), endObj) || current.getTime() + slotDuration * 60000 === endObj.getTime()) {
-        slots.push({
-            start: current.toISOString(),
-            end: addMinutes(current, slotDuration).toISOString(),
-            bufferedStart: addMinutes(current, -(eventType.bufferBefore || 0)).toISOString(),
-            bufferedEnd: addMinutes(current, slotDuration + (eventType.bufferAfter || 0)).toISOString()
-        });
-        // Original logic jumped by duration
-        current = addMinutes(current, 15); // changed to 15 to allow better slot finding with buffers
+        const slotEnd = addMinutes(current, slotDuration);
+
+        // Ensure the slot remains within the same UTC day as the startObj 
+        // to avoid "next day" slots showing up unexpectedly
+        if (slotEnd.getUTCDate() === startObj.getUTCDate()) {
+            slots.push({
+                start: current.toISOString(),
+                end: slotEnd.toISOString(),
+                bufferedStart: addMinutes(current, -(eventType.bufferBefore || 0)).toISOString(),
+                bufferedEnd: addMinutes(slotEnd, (eventType.bufferAfter || 0)).toISOString()
+            });
+        }
+        current = addMinutes(current, 15);
     }
 
     // Include surrounding days to catch overlapping buffers

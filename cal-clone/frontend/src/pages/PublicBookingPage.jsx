@@ -118,12 +118,12 @@ export default function PublicBookingPage() {
                     {!selectedSlot ? (
                         <div>
                             <h2 className="text-lg font-bold text-gray-900 mb-6">Select a Date & Time</h2>
-                            <div className="grid grid-cols-7 gap-2 mb-8">
+                            <div className="flex overflow-x-auto gap-2 mb-8 pb-2 scrollbar-hide -mx-1 px-1">
                                 {nextWeekDates.map((date) => (
                                     <button
                                         key={date.toISOString()}
                                         onClick={() => setSelectedDate(date)}
-                                        className={`p-3 text-center rounded-lg border transition-colors ${format(selectedDate, 'yyyy-MM-dd') === format(date, 'yyyy-MM-dd')
+                                        className={`flex-shrink-0 w-[4.5rem] p-3 text-center rounded-lg border transition-colors ${format(selectedDate, 'yyyy-MM-dd') === format(date, 'yyyy-MM-dd')
                                             ? 'border-black bg-black text-white'
                                             : 'border-gray-200 hover:border-black text-gray-900'
                                             }`}
@@ -134,7 +134,7 @@ export default function PublicBookingPage() {
                                 ))}
                             </div>
 
-                            <div className="grid grid-cols-3 gap-3">
+                            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
                                 {slots.map((slot) => (
                                     <button
                                         key={slot.start}
@@ -145,7 +145,7 @@ export default function PublicBookingPage() {
                                     </button>
                                 ))}
                                 {slots.length === 0 && (
-                                    <div className="col-span-3 text-center py-8 text-gray-500 bg-gray-50 rounded-lg">
+                                    <div className="col-span-2 sm:col-span-3 text-center py-8 text-gray-500 bg-gray-50 rounded-lg">
                                         No slots available on this date.
                                     </div>
                                 )}

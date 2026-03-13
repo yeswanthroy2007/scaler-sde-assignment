@@ -74,37 +74,37 @@ export default function AvailabilitySettings() {
                     const isEnabled = !!dayAvailability;
 
                     return (
-                        <div key={day} className="flex items-center p-6 border-b border-gray-100 last:border-0">
-                            <div className="w-40 flex items-center">
+                        <div key={day} className="flex flex-col sm:flex-row sm:items-center p-6 border-b border-gray-100 last:border-0 hover:bg-gray-50 transition-colors">
+                            <div className="flex items-center mb-4 sm:mb-0 sm:w-40">
                                 <input
                                     type="checkbox"
                                     checked={isEnabled}
                                     onChange={() => handleToggleDay(index)}
-                                    className="h-4 w-4 text-black focus:ring-black border-gray-300 rounded mr-3"
+                                    className="h-5 w-5 sm:h-4 sm:w-4 text-black focus:ring-black border-gray-300 rounded mr-3 cursor-pointer"
                                 />
-                                <span className={`font-medium ${isEnabled ? 'text-gray-900' : 'text-gray-400'}`}>
+                                <span className={`font-bold sm:font-medium ${isEnabled ? 'text-gray-900' : 'text-gray-400'}`}>
                                     {day}
                                 </span>
                             </div>
 
                             {isEnabled ? (
-                                <div className="flex items-center space-x-4">
+                                <div className="flex items-center gap-3">
                                     <input
                                         type="time"
-                                        className="px-3 py-1.5 border border-gray-300 rounded-md text-sm focus:ring-black focus:border-black"
+                                        className="flex-1 sm:flex-none px-3 py-2 sm:py-1.5 border border-gray-300 rounded-md text-sm focus:ring-black focus:border-black bg-white"
                                         value={dayAvailability.startTime}
                                         onChange={(e) => handleTimeChange(index, 'startTime', e.target.value)}
                                     />
-                                    <span className="text-gray-500">-</span>
+                                    <span className="text-gray-400 font-medium px-1">-</span>
                                     <input
                                         type="time"
-                                        className="px-3 py-1.5 border border-gray-300 rounded-md text-sm focus:ring-black focus:border-black"
+                                        className="flex-1 sm:flex-none px-3 py-2 sm:py-1.5 border border-gray-300 rounded-md text-sm focus:ring-black focus:border-black bg-white"
                                         value={dayAvailability.endTime}
                                         onChange={(e) => handleTimeChange(index, 'endTime', e.target.value)}
                                     />
                                 </div>
                             ) : (
-                                <span className="text-sm text-gray-400">Unavailable</span>
+                                <span className="text-sm text-gray-400 bg-gray-100 px-3 py-1 rounded-full w-fit">Unavailable</span>
                             )}
                         </div>
                     );

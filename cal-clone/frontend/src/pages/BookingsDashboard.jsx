@@ -77,10 +77,11 @@ export default function BookingsDashboard() {
             <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
                 <div className="divide-y divide-gray-200">
                     {bookings.map((booking) => (
-                        <div key={booking.id} className="p-6 flex flex-col gap-4 md:flex-row md:justify-between md:items-center hover:bg-gray-50">
-                            <div className="flex flex-col md:flex-row space-y-4 md:space-y-0 md:space-x-6 w-full">
-                                <div className="md:w-1/4">
-                                    <div className="flex items-center text-sm font-medium text-gray-900 mb-1">
+                        <div key={booking.id} className="p-4 sm:p-6 flex flex-col hover:bg-gray-50 transition-colors">
+                            <div className="grid grid-cols-1 md:grid-cols-4 gap-6 items-start">
+                                {/* Date & Time */}
+                                <div className="space-y-1">
+                                    <div className="flex items-center text-sm font-bold text-gray-900">
                                         <Calendar className="h-4 w-4 mr-2 text-gray-400" />
                                         {format(new Date(booking.startTime), 'MMM d, yyyy')}
                                     </div>
@@ -90,48 +91,53 @@ export default function BookingsDashboard() {
                                     </div>
                                 </div>
 
-                                <div className="md:w-1/4">
-                                    <div className="text-sm font-medium text-gray-900 mb-1">{booking.eventType.title}</div>
-                                    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${booking.status === 'CONFIRMED' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                                {/* Event Type & Status */}
+                                <div className="space-y-2">
+                                    <div className="text-sm font-bold text-gray-900">{booking.eventType.title}</div>
+                                    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold ${booking.status === 'CONFIRMED' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
                                         }`}>
                                         {booking.status}
                                     </span>
                                 </div>
 
-                                <div className="md:w-1/3">
-                                    <div className="flex items-center text-sm font-medium text-gray-900 mb-1">
+                                {/* Attendee Info */}
+                                <div className="space-y-1">
+                                    <div className="flex items-center text-sm font-bold text-gray-900">
                                         <User className="h-4 w-4 mr-2 text-gray-400" />
                                         {booking.name}
                                     </div>
-                                    <div className="text-sm text-gray-500 ml-6">{booking.email}</div>
+                                    <div className="text-sm text-gray-500 break-all">{booking.email}</div>
 
                                     {booking.answers && booking.answers.length > 0 && (
-                                        <div className="ml-6 mt-2">
-                                            <p className="text-xs font-bold text-gray-700">Answers:</p>
-                                            {booking.answers.map(ans => (
-                                                <div key={ans.id} className="text-xs text-gray-600 mt-1">
-                                                    <span className="font-medium">{ans.question?.question}:</span> {ans.answer}
-                                                </div>
-                                            ))}
+                                        <div className="mt-3 p-3 bg-gray-50 rounded-lg border border-gray-100">
+                                            <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2">Form Answers</p>
+                                            <div className="space-y-2">
+                                                {booking.answers.map(ans => (
+                                                    <div key={ans.id} className="text-xs text-gray-600">
+                                                        <span className="font-bold text-gray-900">{ans.question?.question}:</span> {ans.answer}
+                                                    </div>
+                                                ))}
+                                            </div>
                                         </div>
                                     )}
                                 </div>
 
-                                <div className="flex items-center justify-end md:w-1/6 space-x-4">
+                                {/* Actions */}
+                                <div className="flex items-center justify-start md:justify-end space-x-4 pt-4 md:pt-0 border-t md:border-0 border-gray-100">
                                     {booking.status === 'CONFIRMED' && (
                                         <>
                                             <button
                                                 onClick={() => openRescheduleModal(booking)}
-                                                className="text-sm font-medium text-blue-600 hover:text-blue-800 transition-colors"
+                                                className="px-3 py-1.5 text-xs font-bold text-blue-600 bg-blue-50 rounded-md hover:bg-blue-100 transition-colors"
                                             >
                                                 Reschedule
                                             </button>
                                             <button
                                                 onClick={() => handleCancel(booking.id)}
-                                                className="text-gray-400 hover:text-red-600 transition-colors"
+                                                className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-md transition-colors"
                                                 title="Cancel Booking"
                                             >
-                                                <XCircle className="h-6 w-6" />
+                                                <XCircle className="h-5 w-5" />
                                             </button>
                                         </>
                                     )}
@@ -159,15 +165,15 @@ export default function BookingsDashboard() {
 
                         {!rescheduleData.selectedSlot ? (
                             <div>
-                                <h3 className="text-sm font-medium text-gray-700 mb-4">Select new date</h3>
-                                <div className="grid grid-cols-7 gap-2 mb-6">
+                                <h3 className="text-sm font-bold text-gray-900 mb-4">Select new date</h3>
+                                <div className="flex overflow-x-auto gap-2 mb-6 pb-2 scrollbar-hide -mx-1 px-1">
                                     {nextWeekDates.map((date) => (
                                         <button
                                             key={date.toISOString()}
                                             onClick={() => setRescheduleData(prev => ({ ...prev, date, selectedSlot: null }))}
-                                            className={`p-2 text-center rounded-lg border transition-colors ${format(rescheduleData.date, 'yyyy-MM-dd') === format(date, 'yyyy-MM-dd')
-                                                    ? 'border-black bg-black text-white'
-                                                    : 'border-gray-200 hover:border-black text-gray-900'
+                                            className={`flex-shrink-0 w-16 p-2 text-center rounded-lg border transition-colors ${format(rescheduleData.date, 'yyyy-MM-dd') === format(date, 'yyyy-MM-dd')
+                                                ? 'border-black bg-black text-white'
+                                                : 'border-gray-200 hover:border-black text-gray-900'
                                                 }`}
                                         >
                                             <div className="text-[10px] uppercase tracking-wider mb-1 opacity-80">{format(date, 'E')}</div>
@@ -176,22 +182,22 @@ export default function BookingsDashboard() {
                                     ))}
                                 </div>
 
-                                <h3 className="text-sm font-medium text-gray-700 mb-4">Available slots</h3>
+                                <h3 className="text-sm font-bold text-gray-900 mb-4">Available slots</h3>
                                 {rescheduleData.loading ? (
-                                    <div className="text-center text-sm text-gray-500">Loading slots...</div>
+                                    <div className="text-center py-6 text-sm text-gray-500">Loading slots...</div>
                                 ) : (
-                                    <div className="grid grid-cols-3 gap-3">
+                                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
                                         {rescheduleData.slots.map((slot) => (
                                             <button
                                                 key={slot.start}
                                                 onClick={() => setRescheduleData(prev => ({ ...prev, selectedSlot: slot }))}
-                                                className="p-2 text-center text-sm font-bold text-black border border-gray-200 rounded-lg hover:border-black hover:shadow-sm transition-all"
+                                                className="p-3 text-center text-sm font-bold text-black border border-gray-200 rounded-lg hover:border-black hover:shadow-sm transition-all bg-white"
                                             >
                                                 {format(new Date(slot.start), 'h:mm a')}
                                             </button>
                                         ))}
                                         {rescheduleData.slots.length === 0 && (
-                                            <div className="col-span-3 text-center py-6 text-sm text-gray-500 bg-gray-50 rounded-lg border border-dashed">
+                                            <div className="col-span-2 sm:col-span-3 text-center py-8 text-sm text-gray-500 bg-gray-50 rounded-lg border border-gray-200 border-dashed">
                                                 No slots available on this date.
                                             </div>
                                         )}

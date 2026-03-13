@@ -28,7 +28,15 @@ export default function PublicBookingPage() {
         if (eventType) {
             const dateStr = format(selectedDate, 'yyyy-MM-dd');
             getAvailableSlots(dateStr, eventType.id)
-                .then(({ data }) => setSlots(data))
+                .then(({ data }) => {
+                    const now = new Date();
+                    // Filter out past slots for the current day
+                    const filtered = data.filter(slot => {
+                        const slotDate = new Date(slot.start);
+                        return slotDate > now;
+                    });
+                    setSlots(filtered);
+                })
                 .catch(console.error);
         }
     }, [selectedDate, eventType]);

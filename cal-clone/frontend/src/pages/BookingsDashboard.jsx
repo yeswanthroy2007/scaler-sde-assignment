@@ -5,6 +5,7 @@ import { Calendar, Clock, User, XCircle, ArrowRight, ArrowLeft } from 'lucide-re
 
 export default function BookingsDashboard() {
     const [bookings, setBookings] = useState([]);
+    const [activeTab, setActiveTab] = useState('upcoming'); // 'upcoming', 'past', 'cancelled'
     const [rescheduleData, setRescheduleData] = useState(null); // { booking, date, slots, loading, selectedSlot }
 
     useEffect(() => {
@@ -70,84 +71,128 @@ export default function BookingsDashboard() {
 
     const nextWeekDates = Array.from({ length: 7 }).map((_, i) => addDays(startOfToday(), i));
 
+    const filteredBookings = bookings.filter(booking => {
+        const isCancelled = booking.status === 'CANCELLED';
+        const isPast = new Date(booking.startTime) < new Date();
+
+        if (activeTab === 'cancelled') return isCancelled;
+        if (isCancelled) return false;
+        if (activeTab === 'upcoming') return !isPast;
+        if (activeTab === 'past') return isPast;
+        return true;
+    });
+
+    const tabs = [
+        { id: 'upcoming', name: 'Upcoming' },
+        { id: 'past', name: 'Past' },
+        { id: 'cancelled', name: 'Cancelled' }
+    ];
+
     return (
         <div>
-            <h1 className="text-2xl font-bold text-gray-900 mb-8">Bookings</h1>
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-8 gap-4">
+                <h1 className="text-2xl font-bold text-gray-900">Bookings</h1>
+                
+                <div className="flex p-1 bg-gray-100 rounded-lg w-fit">
+                    {tabs.map((tab) => (
+                        <button
+                            key={tab.id}
+                            onClick={() => setActiveTab(tab.id)}
+                            className={`px-4 py-1.5 text-sm font-bold rounded-md transition-all ${
+                                activeTab === tab.id
+                                    ? 'bg-white text-black shadow-sm'
+                                    : 'text-gray-500 hover:text-gray-700'
+                            }`}
+                        >
+                            {tab.name}
+                        </button>
+                    ))}
+                </div>
+            </div>
 
             <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
                 <div className="divide-y divide-gray-200">
-                    {bookings.map((booking) => (
-                        <div key={booking.id} className="p-4 sm:p-6 flex flex-col hover:bg-gray-50 transition-colors">
-                            <div className="grid grid-cols-1 md:grid-cols-4 gap-6 items-start">
-                                {/* Date & Time */}
-                                <div className="space-y-1">
-                                    <div className="flex items-center text-sm font-bold text-gray-900">
-                                        <Calendar className="h-4 w-4 mr-2 text-gray-400" />
-                                        {format(new Date(booking.startTime), 'MMM d, yyyy')}
-                                    </div>
-                                    <div className="flex items-center text-sm text-gray-500">
-                                        <Clock className="h-4 w-4 mr-2 text-gray-400" />
-                                        {format(new Date(booking.startTime), 'h:mm a')} - {format(new Date(booking.endTime), 'h:mm a')}
-                                    </div>
-                                </div>
-
-                                {/* Event Type & Status */}
-                                <div className="space-y-2">
-                                    <div className="text-sm font-bold text-gray-900">{booking.eventType.title}</div>
-                                    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold ${booking.status === 'CONFIRMED' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
-                                        }`}>
-                                        {booking.status}
-                                    </span>
-                                </div>
-
-                                {/* Attendee Info */}
-                                <div className="space-y-1">
-                                    <div className="flex items-center text-sm font-bold text-gray-900">
-                                        <User className="h-4 w-4 mr-2 text-gray-400" />
-                                        {booking.name}
-                                    </div>
-                                    <div className="text-sm text-gray-500 break-all">{booking.email}</div>
-
-                                    {booking.answers && booking.answers.length > 0 && (
-                                        <div className="mt-3 p-3 bg-gray-50 rounded-lg border border-gray-100">
-                                            <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2">Form Answers</p>
-                                            <div className="space-y-2">
-                                                {booking.answers.map(ans => (
-                                                    <div key={ans.id} className="text-xs text-gray-600">
-                                                        <span className="font-bold text-gray-900">{ans.question?.question}:</span> {ans.answer}
-                                                    </div>
-                                                ))}
-                                            </div>
+                    {filteredBookings
+                        .sort((a, b) => {
+                            const dateA = new Date(a.startTime);
+                            const dateB = new Date(b.startTime);
+                            return activeTab === 'upcoming' ? dateA - dateB : dateB - dateA;
+                        })
+                        .map((booking) => (
+                            <div key={booking.id} className="p-4 sm:p-6 flex flex-col hover:bg-gray-50 transition-colors">
+                                <div className="grid grid-cols-1 md:grid-cols-4 gap-6 items-start">
+                                    {/* Date & Time */}
+                                    <div className="space-y-1">
+                                        <div className="flex items-center text-sm font-bold text-gray-900">
+                                            <Calendar className="h-4 w-4 mr-2 text-gray-400" />
+                                            {format(new Date(booking.startTime), 'MMM d, yyyy')}
                                         </div>
-                                    )}
-                                </div>
+                                        <div className="flex items-center text-sm text-gray-500">
+                                            <Clock className="h-4 w-4 mr-2 text-gray-400" />
+                                            {format(new Date(booking.startTime), 'h:mm a')} - {format(new Date(booking.endTime), 'h:mm a')}
+                                        </div>
+                                    </div>
 
-                                {/* Actions */}
-                                <div className="flex items-center justify-start md:justify-end space-x-4 pt-4 md:pt-0 border-t md:border-0 border-gray-100">
-                                    {booking.status === 'CONFIRMED' && (
-                                        <>
-                                            <button
-                                                onClick={() => openRescheduleModal(booking)}
-                                                className="px-3 py-1.5 text-xs font-bold text-blue-600 bg-blue-50 rounded-md hover:bg-blue-100 transition-colors"
-                                            >
-                                                Reschedule
-                                            </button>
-                                            <button
-                                                onClick={() => handleCancel(booking.id)}
-                                                className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-md transition-colors"
-                                                title="Cancel Booking"
-                                            >
-                                                <XCircle className="h-5 w-5" />
-                                            </button>
-                                        </>
-                                    )}
+                                    {/* Event Type & Status */}
+                                    <div className="space-y-2">
+                                        <div className="text-sm font-bold text-gray-900">{booking.eventType.title}</div>
+                                        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold ${booking.status === 'CONFIRMED' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                                            }`}>
+                                            {booking.status}
+                                        </span>
+                                    </div>
+
+                                    {/* Attendee Info */}
+                                    <div className="space-y-1">
+                                        <div className="flex items-center text-sm font-bold text-gray-900">
+                                            <User className="h-4 w-4 mr-2 text-gray-400" />
+                                            {booking.name}
+                                        </div>
+                                        <div className="text-sm text-gray-500 break-all">{booking.email}</div>
+
+                                        {booking.answers && booking.answers.length > 0 && (
+                                            <div className="mt-3 p-3 bg-gray-50 rounded-lg border border-gray-100">
+                                                <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2">Form Answers</p>
+                                                <div className="space-y-2">
+                                                    {booking.answers.map(ans => (
+                                                        <div key={ans.id} className="text-xs text-gray-600">
+                                                            <span className="font-bold text-gray-900">{ans.question?.question}:</span> {ans.answer}
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            </div>
+                                        )}
+                                    </div>
+
+                                    {/* Actions */}
+                                    <div className="flex items-center justify-start md:justify-end space-x-4 pt-4 md:pt-0 border-t md:border-0 border-gray-100">
+                                        {booking.status === 'CONFIRMED' && (
+                                            <>
+                                                <button
+                                                    onClick={() => openRescheduleModal(booking)}
+                                                    className="px-3 py-1.5 text-xs font-bold text-blue-600 bg-blue-50 rounded-md hover:bg-blue-100 transition-colors"
+                                                >
+                                                    Reschedule
+                                                </button>
+                                                <button
+                                                    onClick={() => handleCancel(booking.id)}
+                                                    className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-md transition-colors"
+                                                    title="Cancel Booking"
+                                                >
+                                                    <XCircle className="h-5 w-5" />
+                                                </button>
+                                            </>
+                                        )}
+                                    </div>
                                 </div>
                             </div>
-                        </div>
-                    ))}
-                    {bookings.length === 0 && (
-                        <div className="p-12 text-center text-gray-500">
-                            No bookings found.
+                        ))}
+                    {filteredBookings.length === 0 && (
+                        <div className="p-12 text-center">
+                            <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-gray-100 text-gray-400 mb-4">
+                                <Calendar className="h-6 w-6" />
+                            </div>
+                            <p className="text-gray-500 font-medium">No {activeTab} bookings found.</p>
                         </div>
                     )}
                 </div>

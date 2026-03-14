@@ -17,7 +17,7 @@ Custom Questions: Gather specific information from bookers (Company name, Websit
 
 Pro Booking Experience:
 Public Booking Page: Clean, professional interface for users to select dates and times.
-Instant Confirmation: Automated email notifications sent via SendGrid to both the organizer and the booker.
+Instant Confirmation: Automated email notifications are sent via SendGrid to both the organizer and the booker immediately after booking. If the email is not found in the inbox, please check the Spam/Junk folder, as it may occasionally be filtered there.
 Floating Time Standard: Ensures that "9:00 AM" in the database is "9:00 AM" everywhere, preventing timezone shift confusion.
 
 Tech Stack:
